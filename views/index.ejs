@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Chat App</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+      #chat-container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 400px;
+        background-color: white;
+      }
+      .message {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 70%;
+      }
+      .sent {
+        background-color: #dcf8c6;
+        align-self: flex-end;
+      }
+      .received {
+        background-color: #f4f4f4;
+        align-self: flex-start;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-container">
+      <h2>Socket.IO Chat App 1</h2>
+      <p>Connected users: <span id="user-count">0</span></p>
+      <p>All socket Connected users: <span id="user-count2">0</span></p>
+      <div id="chat-messages"></div>
+      <input type="text" id="message" placeholder="Type your message" />
+      <button id="send">Send</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+      const userName = prompt("Enter your name:");
+      const socket = io("/chat");
+      const mainsoket = io();
+      const messageInput = document.getElementById("message");
+      const sendButton = document.getElementById("send");
+      const chatMessages = document.getElementById("chat-messages");
+      const userCount = document.getElementById("user-count");
+      const userCount2 = document.getElementById("user-count2");
+      sendButton.addEventListener("click", () => {
+        const message = messageInput.value;
+        if (message.trim() !== "") {
+          socket.emit("chat message", message);
+          addMessage(message, "sent");
+          messageInput.value = "";
+        }
+      });
+      socket.emit("set_username", userName);
+      socket.on("chat message", (msg) => {
+        addMessage(msg.message, "received");
+      });
+
+      socket.on("user count", (count) => {
+        userCount.textContent = count;
+      });
+
+      mainsoket.on("soketuser", (count2) => {
+        userCount2.textContent = count2;
+      });
+
+      function addMessage(message, messageType) {
+        const messageElement = document.createElement("div");
+        messageElement.textContent = message;
+        messageElement.classList.add("message", messageType);
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
